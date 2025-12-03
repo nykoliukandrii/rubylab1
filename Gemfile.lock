@@ -4,7 +4,6 @@ GEM
     ast (2.4.3)
     bigdecimal (3.3.1)
     csv (3.3.5)
-    fiddle (1.1.6)
     httparty (0.23.2)
       csv
       mini_mime (>= 1.0.0)
@@ -12,6 +11,7 @@ GEM
     json (2.16.0)
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
+    logger (1.7.0)
     mini_mime (1.1.5)
     multi_xml (0.7.2)
       bigdecimal (~> 3.1)
@@ -21,6 +21,7 @@ GEM
     parser (3.3.10.0)
       ast (~> 2.4.1)
       racc
+    pathname (0.4.0)
     prism (1.6.0)
     racc (1.8.1)
     rainbow (3.1.1)
@@ -49,10 +50,10 @@ PLATFORMS
   x64-mingw-ucrt
 
 DEPENDENCIES
-  csv
-  fiddle
   httparty
+  logger
   nokogiri
+  pathname
   rake
   rubocop
 

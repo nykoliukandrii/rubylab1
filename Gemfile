@@ -2,8 +2,8 @@
 
 source 'https://rubygems.org'
 
-gem 'csv'
-gem 'fiddle'
+gem 'logger'
+gem 'pathname'
 gem 'httparty'
 gem 'nokogiri'
 gem 'rake'
