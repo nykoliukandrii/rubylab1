@@ -3,3 +3,9 @@ web_scraping:
   category_title_selector: "ul.breadcrumb li.active"
   item_selector: "article.product_pod h3 a"
   user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+  category_link_selector: "div.side_categories > ul > li > ul > li > a"
+  item_link_selector: 'article.product_pod h3 a'
+  name_selector: 'div.product_main h1'
+  price_selector: 'p.price_color'           
+  description_selector: '#product_description + p' 
+  image_selector: '#product_gallery img'
