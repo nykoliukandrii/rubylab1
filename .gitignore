@@ -1,0 +1,6 @@
+cat > .gitignore << EOL
+/vendor/bundle
+/logs/
+/output/
+.DS_Store
+EOL

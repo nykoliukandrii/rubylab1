@@ -1,0 +1,23 @@
+require:
+  - rubocop-performance 
+
+AllCops:
+  TargetRubyVersion: 3.4
+  Exclude:
+    - 'vendor/**/*'
+    - 'config/**/*.yml'
+    - 'Gemfile'
+    - 'Rakefile'
+    - 'lib/tasks/*.rake'
+
+Layout/LineLength:
+  Max: 120
+
+Style/Documentation:
+  Enabled: false 
+
+Metrics/MethodLength:
+  Max: 20
+
+Style/ClassAndModuleChildren:
+  EnforcedStyle: compact 
