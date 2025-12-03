@@ -1,0 +1,5 @@
+web_scraping:
+  start_page: https://www.factretriever.com/fun-facts
+  category_title_selector: "h1" 
+  fact_item_selector: "article li, .post-content li, ul li, ol li"
+  user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'

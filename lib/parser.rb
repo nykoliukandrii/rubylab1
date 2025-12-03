@@ -10,6 +10,7 @@ require 'nokogiri'
 require 'httparty'
 require 'securerandom'
 
+module MyApplicationNykoliuk
   class Parser
     OUTPUT_DIR = 'output'.freeze
     LOGS_DIR = 'logs'.freeze
@@ -21,7 +22,7 @@ require 'securerandom'
 
     def initialize(config_file)
       cfg = YAML.load_file(config_file)
-      @url = cfg['start_url']
+      @url = cfg['web_scraping']['start_page'] 
       @facts = []
     end
 
@@ -88,3 +89,4 @@ require 'securerandom'
     end
     
   end
+end
