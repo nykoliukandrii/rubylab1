@@ -13,80 +13,76 @@ require 'securerandom'
 module MyApplicationNykoliuk
   class Parser
     OUTPUT_DIR = 'output'.freeze
-    LOGS_DIR = 'logs'.freeze
-    LOG_FILE = File.join(LOGS_DIR, 'application.log').freeze
-    USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'.freeze
-    FACT_SELECTOR = 'article li, .post-content li, ul li, ol li'.freeze
 
-    attr_reader :url, :facts
+    attr_reader :url, :items, :category_selector, :item_selector, :user_agent 
 
     def initialize(config_file)
       cfg = YAML.load_file(config_file)
-      @url = cfg['web_scraping']['start_page'] 
-      @facts = []
+      web_cfg = cfg['web_scraping']
+      
+      @url = web_cfg['start_page']
+      @category_selector = web_cfg['category_title_selector']
+      @item_selector = web_cfg['item_selector'] 
+      @user_agent = web_cfg['user_agent'] 
+      @items = []
     end
 
     def parse_facts
-      log("Старт парсингу: #{url}")
-      response = fetch_html(url)
+      MyApplicationNykoliuk::LoggerManager.log_processed_file("Старт парсингу: #{url}")
       
-      if response && response.body.to_s.length < 500
-          log("ДІАГНОСТИКА: Відповідь сервера занадто коротка. Можливо, це блокування/порожня сторінка.")
-      end
+      response = fetch_html(url, @user_agent) 
       
       unless response&.success?
-        log("Помилка при отриманні URL: #{url}. Код: #{response&.code}")
+        MyApplicationNykoliuk::LoggerManager.log_error("Помилка при отриманні URL: #{url}. Код: #{response&.code}")
         return 
       end
       
       doc = Nokogiri::HTML(response.body)
-      category_title = doc.css('h1').text.strip
-
-      @facts = doc.css(FACT_SELECTOR).collect do |li|
-        text = li.text.strip
+      category_title = doc.css(@category_selector).text.strip 
+      
+      @items = doc.css(@item_selector).collect do |item|
+        text = item.text.strip
         
-        next if text.length <= 5 || text.match?(/^\s*[A-Za-z&\s]+\s*$/)
+        next if text.length <= 5 
         
         {
           id: SecureRandom.uuid,
           category: category_title,
-          fact_text: text,
+          title: text,
           date_parsed: Time.now.strftime('%Y-%m-%d %H:%M:%S')
         } 
       end.compact
+      
+      if @items.empty?
+        MyApplicationNykoliuk::LoggerManager.log_error("Не знайдено елементів за селектором: #{@item_selector}. Можливо, селектор невірний.")
+      end
 
       save_csv
       save_json
-      log("Завершено. Зібрано фактів: #{@facts.size}")
+      MyApplicationNykoliuk::LoggerManager.log_processed_file("Завершено. Зібрано елементів: #{@items.size}")
     end
 
     private
-    def fetch_html(target_url)
-      HTTParty.get(target_url, headers: { 'User-Agent' => USER_AGENT }, timeout: 10 )
+    def fetch_html(target_url, user_agent)
+      HTTParty.get(target_url, headers: { 'User-Agent' => user_agent }, timeout: 10 )
     rescue HTTParty::Error => e
-      log("Критична помилка HTTParty: #{e.message}")
+      MyApplicationNykoliuk::LoggerManager.log_error("Критична помилка HTTParty: #{e.message}")
       nil
     end
 
     def save_csv
       FileUtils.mkdir_p(OUTPUT_DIR)
-      headers = facts.first&.keys || ['fact_text']
+      headers = @items.first&.keys || ['title'] 
       CSV.open(File.join(OUTPUT_DIR, 'facts.csv'), 'w', col_sep: ';', headers: headers, write_headers: true) do |csv|
-        facts.each { |fact| csv << fact.values }
+        @items.each { |item| csv << item.values }
       end
-      log('Дані збережені у CSV.')
+      MyApplicationNykoliuk::LoggerManager.log_processed_file('Дані збережені у CSV.')
     end
 
     def save_json
       FileUtils.mkdir_p(OUTPUT_DIR)
-      File.write(File.join(OUTPUT_DIR, 'facts.json'), JSON.pretty_generate(facts))
-      log('Дані збережені у JSON.')
+      File.write(File.join(OUTPUT_DIR, 'facts.json'), JSON.pretty_generate(@items))
+      MyApplicationNykoliuk::LoggerManager.log_processed_file('Дані збережені у JSON.')
     end
-
-    def log(msg)
-      FileUtils.mkdir_p(LOGS_DIR)
-      File.open(LOG_FILE, 'a') { |f| f.puts("#{Time.now.strftime('%Y-%m-%d %H:%M:%S')}: #{msg}") }
-    end
-    
   end
 end
